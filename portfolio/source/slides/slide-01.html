@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AskDock — 01 Cover</title>
+<link rel="stylesheet" href="deck.css">
+<script src="../shots/anchors.js"></script>
+<style>
+  .slide { --a1x: 0%; --a1y: 20%; --a3x: 96%; --a3y: 0%; }
+  .intro { position: absolute; left: 96px; top: 196px; width: 780px; }
+  .title { margin: 30px 0 0; font-size: 176px; line-height: 0.9; font-weight: 600; letter-spacing: -0.055em; }
+  .title i { font-family: var(--serif); font-weight: 400; font-size: 200px; letter-spacing: -0.02em; }
+  .tagline { margin: 18px 0 0; font-family: var(--serif); font-size: 56px; line-height: 1.04; letter-spacing: -0.015em; }
+  .desc { margin: 26px 0 0; width: 720px; font-size: 23px; line-height: 1.55; color: var(--muted); }
+  .info { position: absolute; left: 96px; top: 730px; width: 760px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .info .card { padding: 22px 26px 24px; }
+  .info .kicker { margin-bottom: 10px; }
+  .info p { margin: 0; font-size: 20px; line-height: 1.35; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top" data-label="Portfolio · SaaS web app" data-n="1"></div>
+
+  <div class="intro">
+    <div class="eyebrow">Concept project · AI chatbot builder</div>
+    <h1 class="title">Ask<i class="grad">Dock</i></h1>
+    <p class="tagline">The AI front desk for small businesses.</p>
+    <p class="desc">Businesses upload PDFs or crawl their website; AskDock answers customers with cited sources, collects an email when it can't, and installs with one script tag.</p>
+  </div>
+
+  <div class="info">
+    <div class="card"><div class="kicker">Scope</div><p>Product design &amp; full-stack build</p></div>
+    <div class="card"><div class="kicker">Pages</div><p>Landing, auth, 11-screen dashboard, chat widget</p></div>
+    <div class="card"><div class="kicker">Built with</div><p>Next.js 15 · Supabase · OpenAI · Stripe</p></div>
+    <div class="card"><div class="kicker">Devices</div><p>Mobile, tablet &amp; desktop</p></div>
+  </div>
+
+  <div class="browser" data-shot="d-hero" data-url="askdock.vercel.app" style="left: 1004px; top: 196px; width: 900px;"></div>
+  <div class="phone" data-shot="m-widget-answer" data-sb="linear-gradient(90deg,#23798a 0%,#277b8c 38%,#3f8a99 64%,#5f9daa 100%)" data-sbc="#fff" style="left: 884px; top: 432px; width: 290px;"></div>
+</div>
+<script src="deck.js"></script>
+</body>
+</html>

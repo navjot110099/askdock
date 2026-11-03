@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AskDock — 08 Inner pages</title>
+<link rel="stylesheet" href="deck.css">
+<script src="../shots/anchors.js"></script>
+<style>
+  .head { position: absolute; left: 208px; top: 134px; width: 1584px; display: grid; grid-template-columns: 1fr 520px; gap: 60px; align-items: end; }
+  .head .headline { margin-top: 18px; font-size: 58px; }
+  .head .sub { margin: 0 0 4px; font-size: 19px; }
+  .grid { position: absolute; left: 208px; top: 276px; width: 1584px; display: grid; grid-template-columns: repeat(3, 480px); gap: 24px 72px; }
+  .cell .browser { position: relative; width: 100%; }
+  .cap { display: grid; grid-template-columns: 30px 1fr; gap: 12px; margin-top: 13px; align-items: start; }
+  .cap .n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; font-size: 13.5px; font-weight: 600; box-shadow: 0 0 0 2px rgba(143, 103, 238, 0.4); }
+  .cap b { display: block; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .cap span { display: block; margin-top: 1px; font-size: 14.5px; line-height: 1.4; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top" data-label="Inner pages" data-n="8"></div>
+
+  <div class="head">
+    <div>
+      <div class="eyebrow">Dashboard &amp; auth</div>
+      <h2 class="headline">Every screen a small business <em>actually needs</em>.</h2>
+    </div>
+    <p class="sub">Sixteen screens in all. Here are six more, each running on the seeded Juniper Dental workspace.</p>
+  </div>
+
+  <div class="grid">
+    <div class="cell">
+      <div class="browser sm" data-shot="d-overview" data-url="askdock.vercel.app/dashboard"></div>
+      <div class="cap"><span class="n">1</span><div><b>Overview</b><span>KPIs, messages per day and top questions at a glance.</span></div></div>
+    </div>
+    <div class="cell">
+      <div class="browser sm" data-shot="d-conversations" data-url="askdock.vercel.app/dashboard/conversations"></div>
+      <div class="cap"><span class="n">2</span><div><b>Conversations</b><span>Filter unanswered or lead chats; search text or email.</span></div></div>
+    </div>
+    <div class="cell">
+      <div class="browser sm" data-shot="d-transcript" data-url="askdock.vercel.app/dashboard/conversations/…"></div>
+      <div class="cap"><span class="n">3</span><div><b>Transcript</b><span>Every turn with citation chips and visitor details.</span></div></div>
+    </div>
+    <div class="cell">
+      <div class="browser sm" data-shot="d-analytics-gaps" data-url="askdock.vercel.app/dashboard/analytics"></div>
+      <div class="cap"><span class="n">4</span><div><b>Knowledge gaps</b><span>Unanswered questions, ranked, with “Add knowledge”.</span></div></div>
+    </div>
+    <div class="cell">
+      <div class="browser sm" data-shot="d-billing" data-url="askdock.vercel.app/dashboard/billing"></div>
+      <div class="cap"><span class="n">5</span><div><b>Billing</b><span>Stripe Checkout, portal and usage meters per plan.</span></div></div>
+    </div>
+    <div class="cell">
+      <div class="browser sm" data-shot="d-signup" data-url="askdock.vercel.app/signup"></div>
+      <div class="cap"><span class="n">6</span><div><b>Sign up</b><span>Google or email sign-up through Supabase Auth.</span></div></div>
+    </div>
+  </div>
+</div>
+<script src="deck.js"></script>
+</body>
+</html>

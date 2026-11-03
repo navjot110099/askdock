@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AskDock — 10 Responsive and quality</title>
+<link rel="stylesheet" href="deck.css">
+<script src="../shots/anchors.js"></script>
+<style>
+  .slide { --a4x: 50%; --a4y: 112%; }
+  .head { position: absolute; left: 96px; top: 150px; width: 1808px; display: grid; grid-template-columns: 820px 1fr; gap: 70px; align-items: end; }
+  .head .headline { margin-top: 20px; font-size: 64px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-end; }
+  .chips .chip { height: 42px; font-size: 16px; padding: 0 18px; }
+  .chips .chip.int { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .cap { position: absolute; width: 300px; text-align: center; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .cap span { display: block; margin-top: 3px; font-size: 14px; font-weight: 400; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top" data-label="Responsive &amp; quality" data-n="10"></div>
+
+  <div class="head">
+    <div>
+      <div class="eyebrow">Mobile, tablet &amp; desktop</div>
+      <h2 class="headline">The whole product fits in a <em>pocket</em>.</h2>
+    </div>
+    <div class="chips">
+      <span class="chip"><span class="dot"></span>Responsive 375–1920px</span>
+      <span class="chip"><span class="dot"></span>Accessible</span>
+      <span class="chip"><span class="dot"></span>SEO-ready</span>
+      <span class="chip"><span class="dot"></span>Fast</span>
+      <span class="chip int">Supabase</span>
+      <span class="chip int">OpenAI</span>
+      <span class="chip int">Stripe</span>
+      <span class="chip int">Vercel AI SDK</span>
+    </div>
+  </div>
+
+  <div class="phone" data-shot="m-hero" data-sb="linear-gradient(90deg,#f2eaf1,#eedbe3 25%,#f0d2d4 48%,#f9d0c8 82%,#f9d1cc)" style="left: 116px; top: 330px; width: 300px;"></div>
+  <div class="phone" data-shot="m-menu" data-sb="linear-gradient(90deg,#d8d2d8,#d6c6cd 25%,#e8e1d9 25.1%,#fbf8f4 25.5%)" style="left: 476px; top: 330px; width: 300px;"></div>
+  <div class="phone" data-shot="m-overview" style="left: 836px; top: 330px; width: 300px;"></div>
+  <div class="phone" data-shot="m-analytics" style="left: 1196px; top: 330px; width: 300px;"></div>
+  <div class="phone" data-shot="m-leads" style="left: 1556px; top: 330px; width: 300px;"></div>
+
+  <div class="cap" style="left: 116px; top: 1006px;">Landing<span>Hero at 390px</span></div>
+  <div class="cap" style="left: 476px; top: 1006px;">Menu open<span>Slide-over navigation</span></div>
+  <div class="cap" style="left: 836px; top: 1006px;">Overview<span>Two-column stat cards</span></div>
+  <div class="cap" style="left: 1196px; top: 1006px;">Analytics<span>Range and bot filters</span></div>
+  <div class="cap" style="left: 1556px; top: 1006px;">Leads<span>Table becomes cards</span></div>
+</div>
+<script src="deck.js"></script>
+</body>
+</html>

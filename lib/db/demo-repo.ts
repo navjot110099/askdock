@@ -14,8 +14,18 @@ type State = DemoDataset;
 
 const store = globalThis as unknown as { __askdockDemo?: State };
 
+/**
+ * The seeded history is generated relative to this moment. Pin it with
+ * DEMO_SEED_NOW (any ISO date) to get identical numbers across restarts,
+ * e.g. for screenshots; otherwise it is the server start time.
+ */
+function seedNow() {
+  const pinned = process.env.DEMO_SEED_NOW ? new Date(process.env.DEMO_SEED_NOW) : null;
+  return pinned && !Number.isNaN(pinned.getTime()) ? pinned : new Date();
+}
+
 function state(): State {
-  store.__askdockDemo ??= buildDemoDataset(DEMO_USER.id);
+  store.__askdockDemo ??= buildDemoDataset(DEMO_USER.id, seedNow());
   return store.__askdockDemo;
 }
 
