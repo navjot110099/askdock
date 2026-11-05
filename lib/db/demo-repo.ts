@@ -29,6 +29,11 @@ function state(): State {
   return store.__askdockDemo;
 }
 
+/** Restores the seeded workspace, discarding uploads, chats, leads and plan changes. */
+export function resetDemoData() {
+  store.__askdockDemo = buildDemoDataset(DEMO_USER.id, seedNow());
+}
+
 const now = () => new Date().toISOString();
 
 function ownedBot(ownerId: string, botId: string) {

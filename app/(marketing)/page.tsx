@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Hero } from "@/components/marketing/hero";
 import { LiveDemo } from "@/components/marketing/live-demo";
 import { Faq, Features, FinalCta, HowItWorks, Industries, Pricing } from "@/components/marketing/sections";
@@ -5,6 +6,13 @@ import { toChatConfig } from "@/lib/chat-config";
 import { repo } from "@/lib/db";
 import { DEMO_BOT_ID } from "@/lib/demo/constants";
 import { env, hasOpenAI } from "@/lib/env";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  description:
+    "AskDock learns your PDFs, docs and website, answers customers 24/7 with cited sources, captures leads when it can't, and installs with one line of code.",
+  path: "/",
+});
 
 export const dynamic = "force-dynamic";
 

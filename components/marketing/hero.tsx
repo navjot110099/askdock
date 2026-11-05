@@ -34,8 +34,8 @@ export function Hero() {
           </motion.h1>
 
           <motion.p {...fade(0.16)} className="mx-auto mt-6 max-w-2xl text-[17px] leading-relaxed text-muted-foreground text-pretty sm:text-lg">
-            AskDock reads your PDFs, documents and web pages, then answers customer questions around the clock — with sources. When it
-            doesn&apos;t know, it politely collects an email so you can follow up.
+            AskDock learns your PDFs, docs and website, answers customers around the clock with cited sources, and collects an email
+            whenever it doesn&apos;t know.
           </motion.p>
 
           <motion.div {...fade(0.24)} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">

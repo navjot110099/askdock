@@ -1,7 +1,10 @@
 import { getCurrentUser } from "@/lib/auth";
 import { LimitError, NotFoundError } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { CrawlError } from "@/lib/rag/crawl";
 import { ingestFile, ingestUrl } from "@/lib/rag/ingest";
+
+const log = logger("sources");
 
 export const maxDuration = 60;
 
@@ -27,7 +30,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ botId: 
     if (error instanceof NotFoundError) return Response.json({ error: "Bot not found" }, { status: 404 });
     if (error instanceof LimitError) return Response.json({ error: error.message }, { status: 402 });
     if (error instanceof CrawlError) return Response.json({ error: error.message }, { status: 422 });
-    console.error("[sources]", error);
+    log.error("ingestion failed", error);
     const message = error instanceof Error ? error.message : "Something went wrong while processing this source.";
     return Response.json({ error: message }, { status: 500 });
   }

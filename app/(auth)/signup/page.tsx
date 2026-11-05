@@ -3,8 +3,13 @@ import { AuthForm } from "@/app/(auth)/auth-form";
 import { AuthShell } from "@/app/(auth)/auth-shell";
 import { isDemoMode } from "@/lib/env";
 import { PLANS, type PlanId } from "@/lib/plans";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Create your account", description: "Start free with AskDock — no credit card needed." };
+export const metadata: Metadata = pageMetadata({
+  title: "Create your account",
+  description: "Start free with AskDock: build an AI assistant from your own documents in about five minutes. No credit card needed.",
+  path: "/signup",
+});
 
 export default async function SignupPage({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
   const { plan } = await searchParams;

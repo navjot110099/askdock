@@ -11,6 +11,9 @@
   window.__askdockWidget = true;
 
   var botId = script.getAttribute("data-bot");
+  // The embed runs on customers' sites without our bundle, so it warns directly:
+  // this is the only signal a site owner gets that their snippet is incomplete.
+  // eslint-disable-next-line no-console
   if (!botId) return console.warn("[AskDock] Missing data-bot attribute on the widget script.");
   var origin = new URL(script.src, location.href).origin;
   var side = script.getAttribute("data-position") === "left" ? "left" : "right";

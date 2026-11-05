@@ -27,7 +27,7 @@ if (!url || !serviceKey || !openaiKey) {
 
 const db = createClient(url, serviceKey, { auth: { persistSession: false } });
 const openai = createOpenAI({ apiKey: openaiKey });
-const email = process.env.SEED_DEMO_EMAIL ?? DEMO_USER.email;
+const email = process.env.SEED_DEMO_EMAIL || DEMO_USER.email;
 
 function check<T>(label: string, res: { data: T; error: { message: string } | null }) {
   if (res.error) throw new Error(`${label}: ${res.error.message}`);
@@ -46,7 +46,7 @@ async function findOrCreateUser() {
     if (existing) return { id: existing.id, password: null };
     if (data.users.length < 200) break;
   }
-  const password = process.env.SEED_DEMO_PASSWORD ?? randomBytes(9).toString("base64url");
+  const password = process.env.SEED_DEMO_PASSWORD || randomBytes(9).toString("base64url");
   const { data, error } = await db.auth.admin.createUser({
     email,
     password,
@@ -104,7 +104,7 @@ async function main() {
 
   console.log(`→ Embedding ${ds.chunks.length} chunks with OpenAI`);
   const { embeddings } = await embedMany({
-    model: openai.embeddingModel(process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small"),
+    model: openai.embeddingModel(process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-3-small"),
     values: ds.chunks.map((c) => `${c.title}\n${c.content}`),
   });
   await inBatches(

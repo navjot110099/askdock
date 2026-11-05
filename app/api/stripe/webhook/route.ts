@@ -1,6 +1,9 @@
 import type Stripe from "stripe";
 import { env, hasStripe } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { stripe, syncSubscription } from "@/lib/stripe";
+
+const log = logger("stripe");
 
 /**
  * Stripe → AskDock plan sync. Point a test-mode webhook endpoint (or
@@ -16,7 +19,7 @@ export async function POST(req: Request) {
   try {
     event = stripe().webhooks.constructEvent(await req.text(), signature, env.stripeWebhookSecret);
   } catch (error) {
-    console.error("[stripe] signature verification failed", error);
+    log.error("signature verification failed", error);
     return new Response("Invalid signature", { status: 400 });
   }
 
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
         break;
     }
   } catch (error) {
-    console.error(`[stripe] failed to handle ${event.type}`, error);
+    log.error(`failed to handle ${event.type}`, error);
     return new Response("Webhook handler failed", { status: 500 });
   }
 

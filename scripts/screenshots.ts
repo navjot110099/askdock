@@ -12,8 +12,8 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { chromium, type Browser, type Page } from "playwright";
 
-const BASE = (process.env.SCREENSHOT_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-const DEMO_BOT = process.env.NEXT_PUBLIC_DEMO_BOT_ID ?? "6a1d2c3e-4f50-4a7b-9c8d-0e1f2a3b4c5d";
+const BASE = (process.env.SCREENSHOT_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+const DEMO_BOT = process.env.NEXT_PUBLIC_DEMO_BOT_ID || "6a1d2c3e-4f50-4a7b-9c8d-0e1f2a3b4c5d";
 const OUT = path.join(process.cwd(), "screenshots");
 
 const VIEWPORTS = [

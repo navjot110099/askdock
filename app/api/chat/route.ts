@@ -11,12 +11,15 @@ import {
 import { z } from "zod";
 import { repo } from "@/lib/db";
 import { env, hasOpenAI } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { getPlan } from "@/lib/plans";
 import { clientIp, rateLimit, startOfMonthIso } from "@/lib/rate-limit";
 import { demoAnswer } from "@/lib/rag/demo-responder";
 import { openai } from "@/lib/rag/embed";
 import { buildSystemPrompt, toCitations } from "@/lib/rag/prompt";
 import type { ChatMessage, Citation, PublicBot } from "@/lib/types";
+
+const log = logger("chat");
 
 export const maxDuration = 30;
 
@@ -90,7 +93,7 @@ export async function POST(req: Request) {
       else await answerOffline(writer, bot, question, chunks, conversationId);
     },
     onError: (error) => {
-      console.error("[chat]", error);
+      log.error("stream failed", error);
       return "Sorry — something went wrong on our side. Please try again.";
     },
   });

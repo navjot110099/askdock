@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Info } from "lucide-react";
+import { DemoBanner } from "@/components/dashboard/demo-banner";
 import { DashboardSidebar, MobileTopbar } from "@/components/dashboard/sidebar";
 import { requireUser } from "@/lib/auth";
 import { repo } from "@/lib/db";
@@ -27,13 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <DashboardSidebar {...props} />
       <div className="min-w-0 flex-1">
         <MobileTopbar {...props} />
-        {isDemoMode && (
-          <div className="border-b border-iris/15 bg-accent/70 px-4 py-2 text-center text-[12px] text-accent-foreground sm:px-8">
-            <Info className="mr-1.5 inline size-3.5 align-[-2px]" />
-            <span className="sm:hidden">Demo workspace · seeded data, resets on restart.</span>
-            <span className="hidden sm:inline">Demo workspace with seeded data for the fictional Juniper Dental Studio. Changes are kept in memory and reset when the server restarts.</span>
-          </div>
-        )}
+        {isDemoMode && <DemoBanner />}
         <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-8 sm:py-10">{children}</main>
       </div>
     </div>

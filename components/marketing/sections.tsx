@@ -82,7 +82,7 @@ const STEPS = [
   {
     n: "01",
     title: "Add what you already know",
-    body: "Upload price lists, policies and guides as PDF or Word files — or paste your website address and we'll read every page.",
+    body: "Upload price lists, policies and guides as PDF or Word files, or paste your website address and AskDock reads the pages for you.",
     visual: (
       <div className="space-y-2">
         {[
@@ -146,7 +146,11 @@ export function HowItWorks() {
   return (
     <section id="how" className="scroll-mt-24 py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionTitle eyebrow="How it works" title={<>From documents to answers in <em>three</em> calm steps.</>} />
+        <SectionTitle
+          eyebrow="How it works"
+          title={<>From documents to answers in <em>three</em> calm steps.</>}
+          intro="No developer and no training data: just the documents and website you already have."
+        />
         <div className="mt-14 grid gap-5 md:grid-cols-3">
           {STEPS.map((step, i) => (
             <Reveal key={step.n} delay={i * 0.08} className="flex min-w-0 flex-col rounded-[26px] border border-black/[0.06] bg-white/60 p-6 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] backdrop-blur">
@@ -209,7 +213,7 @@ export function Features() {
             </div>
           </FeatureCard>
 
-          <FeatureCard className="md:col-span-2" title="Learns from what you have" body="PDF, Word, text and Markdown files, plus full website crawls — re-index whenever things change.">
+          <FeatureCard className="md:col-span-2" title="Learns from what you have" body="PDF, Word, text and Markdown files plus website crawls. Add or remove sources whenever things change.">
             <div className="flex flex-wrap gap-2">
               {["PDF", "DOCX", "TXT", "Markdown", "Website URL"].map((t) => (
                 <span key={t} className="rounded-full border border-black/[0.08] bg-white px-3 py-1 text-[13px]">

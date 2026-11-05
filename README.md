@@ -1,6 +1,8 @@
 # AskDock — AI chatbots for small businesses
 
-AskDock turns a business's PDFs, Word documents and website into a friendly AI assistant that answers customer questions 24/7 **with cited sources**, collects the visitor's email when it can't help, and installs on any website with **one `<script>` tag**.
+**Turn your website into a front desk that never sleeps.** AskDock learns a business's PDFs, Word documents and website, answers customers 24/7 **with cited sources**, collects an email when it doesn't know, and installs on any site with **one `<script>` tag**.
+
+**Live demo:** [askdock.vercel.app](https://askdock.vercel.app) · no sign-up, no keys
 
 ![AskDock landing page](screenshots/desktop/01-landing-hero.png)
 
@@ -8,11 +10,42 @@ AskDock turns a business's PDFs, Word documents and website into a friendly AI a
 
 ---
 
+## Run the demo in 60 seconds
+
+No accounts, API keys or `.env` file needed. With zero environment variables AskDock runs on an in-memory workspace seeded with **Juni**, the assistant for a fictional dental clinic.
+
+```bash
+git clone https://github.com/navjot110099/askdock.git
+cd askdock
+npm install
+npm run dev
+```
+
+Then open http://localhost:3000 and:
+
+1. **Ask Juni something** in the *Live demo* section — try "How much are clear aligners?" (cited answer) or "Do you treat sleep apnea?" (lead capture).
+2. **Sign in** — demo mode opens the seeded workspace straight away, no password.
+3. **Explore the dashboard**: upload [`samples/Cosmetic-Treatments-2026.pdf`](samples) on the bot's *Knowledge* tab, restyle it on *Customise*, copy the snippet from *Install*, then check *Conversations*, *Leads* and *Analytics*.
+4. **See the widget on a website** at http://localhost:3000/widget-demo.
+5. **Start over** any time with **Reset demo** in the purple *Demo mode* banner.
+
+---
+
+## How it works
+
+1. **Add what you already have.** Upload price lists, policies and guides (PDF, DOCX, TXT, Markdown) or paste the website address. AskDock extracts the text, splits it into chunks and indexes them.
+2. **Make it sound like you.** Name, avatar, brand colour, welcome message and suggested questions, previewed live.
+3. **Paste one line.** A script tag adds a chat bubble to any site. Visitors get answers that cite the exact document or page; questions it can't answer become leads, and the dashboard shows what to add next.
+
+Under the hood each answer is retrieval-augmented: the question is matched against the bot's chunks, the best excerpts are numbered in the prompt, and the model must answer only from them and cite `[n]` (details [below](#under-the-hood-the-rag-pipeline)).
+
+---
+
 ## Features
 
 | Area | What's included |
 | --- | --- |
-| **Landing page** | Animated hero with a scripted widget demo, how it works, features bento, a **live demo** chatting with the seeded dental bot, pricing (Free / Pro / Business), FAQ, final CTA, JSON-LD + Open Graph image, sitemap and robots |
+| **Landing page** | Animated hero with a scripted widget demo, how it works, features bento, a **live demo** chatting with the seeded dental bot, pricing (Free / Pro / Business), FAQ, final CTA |
 | **Auth** | Supabase Auth with email + password, magic link and **Google OAuth** (server actions + `@supabase/ssr` cookies, middleware-protected dashboard) |
 | **Create a bot** | Name, business, colour and avatar → then add knowledge: **upload PDF / DOCX / TXT / MD** or **crawl a website URL** (same-site BFS, robots.txt, SSRF protection, plan page limits) |
 | **RAG pipeline** | Heading-aware chunking → **OpenAI `text-embedding-3-small`** → **Supabase pgvector** (HNSW, cosine) → `match_chunks` RPC → grounded prompt with numbered excerpts |
@@ -22,16 +55,18 @@ AskDock turns a business's PDFs, Word documents and website into a friendly AI a
 | **Embeddable widget** | `public/widget.js`: Shadow-DOM bubble + lazy iframe, greeting pop-up, mobile full-screen, `data-position` / `data-greeting` options, `window.AskDock.open()` |
 | **Dashboard** | Overview KPIs with period deltas, **messages per day** chart, **top questions**, knowledge gaps, busiest hours, conversations (filters, search, transcripts with citations), leads (status pipeline, CSV export) |
 | **Billing** | **Stripe test mode**: Checkout, signed **webhook** → plan sync, **customer portal**, usage meters. **Plan limits enforced** server-side (bots, sources, crawl pages, file size, monthly messages, lead capture, branding, CSV export, analytics range) |
-| **Seed data** | A full dental-clinic workspace: 2 bots, 4 sources, ~2 months of realistic conversations, leads and a Pro subscription |
+| **SEO** | Per-page titles, descriptions and canonical URLs, Open Graph + Twitter image, JSON-LD, `sitemap.xml`, `robots.txt`; dashboard, embed and sample pages are `noindex` |
+| **Demo mode** | Zero-config in-memory workspace with a **Demo mode** badge and **Reset demo** button; 2 bots, 4 sources, ~2 months of realistic conversations, leads and a Pro subscription |
 
-### Demo mode (no accounts needed)
+### Demo mode in detail
 
-If the Supabase keys are missing, AskDock runs on an **in-memory demo workspace** built from the same seed data, so every screen works out of the box:
+Whenever the Supabase keys are missing, AskDock runs on an **in-memory demo workspace** built from the same seed data as `npm run seed`:
 
-- sign-in opens the seeded workspace,
+- sign-in opens the seeded workspace, and every dashboard page shows a **Demo mode** badge with a **Reset demo** button that restores the seed,
 - uploads and crawls really parse and chunk content (stored in memory),
 - retrieval uses BM25 instead of pgvector, and without `OPENAI_API_KEY` answers are assembled extractively from the best-matching passages (still streamed, still cited, still triggering lead capture),
-- plan switches on the billing page apply instantly instead of going through Stripe.
+- plan switches on the billing page apply instantly instead of going through Stripe,
+- data lives in server memory, so it also resets on restart (on Vercel, per serverless instance). Set `DEMO_SEED_NOW` to pin the seed's reference date when you need identical numbers, e.g. for screenshots.
 
 Add the keys below and the exact same UI runs on Supabase, OpenAI and Stripe.
 
@@ -42,16 +77,6 @@ Add the keys below and the exact same UI runs on Supabase, OpenAI and Stripe.
 Next.js 15 (App Router, Server Actions, Turbopack) · TypeScript · Tailwind CSS v4 · shadcn/ui (Radix) · Framer Motion · Vercel AI SDK v7 + `@ai-sdk/openai` · Supabase (Auth, Postgres, pgvector, Storage, RLS) · Stripe · Recharts · unpdf · mammoth · cheerio · zod · Playwright
 
 ---
-
-## Quick start (demo mode)
-
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
-```
-
-Open http://localhost:3000, try the live demo, then **Sign in** — demo mode signs you straight into the Juniper Dental workspace. Sample files for testing uploads are in [`samples/`](samples).
 
 ## Full setup (live mode)
 
@@ -88,8 +113,8 @@ Creates `demo@askdock.app` (password from `SEED_DEMO_PASSWORD`, or a generated o
 
 ### 5. Deploy to Vercel
 
-1. Push the repo and import it in Vercel (framework preset: Next.js).
-2. Add every variable from `.env.example` (set `NEXT_PUBLIC_APP_URL` to the production URL).
+1. Push the repo and import it in Vercel (framework preset: Next.js). With no variables at all it deploys in demo mode.
+2. For live mode, add the variables from `.env.example`. `NEXT_PUBLIC_APP_URL` is optional on Vercel: it falls back to the project's production domain.
 3. Add the production `/auth/callback` URL in Supabase and the production webhook endpoint in Stripe.
 
 Chat streams for up to 30 s and ingestion runs up to 60 s (`maxDuration` on the routes).
@@ -124,7 +149,7 @@ Limits live in [`lib/plans.ts`](lib/plans.ts) and are enforced in server actions
 
 ---
 
-## How the RAG chat works
+## Under the hood: the RAG pipeline
 
 1. **Ingest** (`lib/rag/ingest.ts`): files are parsed with unpdf / mammoth, sites are crawled with cheerio; text is split by headings into ~1,100-character chunks with sentence overlap (`lib/rag/chunk.ts`), embedded in batches and stored in `chunks` with an HNSW index.
 2. **Retrieve** (`app/api/chat/route.ts`): the visitor's question (plus the previous one for short follow-ups like "and for kids?") is embedded and matched with `match_chunks` (cosine similarity, per bot).
@@ -137,6 +162,11 @@ Limits live in [`lib/plans.ts`](lib/plans.ts) and are enforced in server actions
 - Crawler blocks private/loopback/link-local addresses (re-checked on every redirect) and caps page size, page count and time.
 - Per-IP rate limits on chat and lead capture, zod validation on every input, CSV export neutralises spreadsheet formulas.
 - Prompt instructs the model to ignore instructions embedded in documents or messages.
+- `.env.example` holds empty placeholders only; real keys live in `.env.local` (git-ignored) or Vercel project settings. Live Stripe keys are refused at startup.
+
+## Logging
+
+App code logs through `lib/logger.ts` instead of `console` (ESLint's `no-console` rule enforces it). `debug` and `info` are silent in production; `warn` and `error` always reach the server logs so real failures are never swallowed.
 
 ## Scripts
 
@@ -147,6 +177,7 @@ Limits live in [`lib/plans.ts`](lib/plans.ts) and are enforced in server actions
 | `npm run seed` | Seed the demo workspace into Supabase |
 | `npm run screenshots` | Capture every key screen at 1440×900 and 390×844 into `screenshots/` (start the app first; set `SCREENSHOT_BASE_URL` if not on :3000) |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
+| `npx tsx portfolio/source/capture.ts` → `render.ts` | Rebuild the 10 portfolio slides in `portfolio/` (see the header of `capture.ts`) |
 
 ## Project structure
 
@@ -163,12 +194,13 @@ lib/
   rag/                chunking, extraction, crawler, embeddings, prompt, lexical search, offline responder
   db/                 repository interface + Supabase and in-memory demo implementations
   demo/               Juniper Dental knowledge base and deterministic seed generator
-  plans.ts stripe.ts analytics.ts auth.ts env.ts
+  plans.ts stripe.ts analytics.ts auth.ts env.ts logger.ts
 public/widget.js      the embeddable chat bubble
 supabase/migrations/  schema, pgvector, RLS, triggers
 scripts/              seed + Playwright screenshots
 samples/              sample PDF and DOCX for testing uploads
 screenshots/          desktop/ and mobile/ captures
+portfolio/            10 annotated portfolio slides + the scripts that build them
 ```
 
 ## Screenshots

@@ -20,7 +20,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { chromium, type Browser, type BrowserContext, type Locator, type Page } from "playwright";
 
-const BASE = (process.env.PORTFOLIO_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const BASE = (process.env.PORTFOLIO_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
 const BOT = "6a1d2c3e-4f50-4a7b-9c8d-0e1f2a3b4c5d";
 const OUT = path.join(process.cwd(), "portfolio/source/shots");
 const ONLY = process.env.ONLY?.split(",");
