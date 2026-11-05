@@ -146,6 +146,7 @@ async function desktopVisitor(browser: Browser) {
     cta: page.getByRole("link", { name: /Start free — no card needed/ }),
     trust: page.getByText("Works on any website"),
     proof: page.getByText("Services-and-Pricing-2026.pdf").first(),
+    proofCard: page.getByText("Services-and-Pricing-2026.pdf").first().locator("xpath=ancestor::div[contains(@class,'rounded')][1]"),
     stat: page.getByText("Answered this week"),
     nav: page.locator('nav[aria-label="Main"]'),
   });
@@ -252,6 +253,8 @@ async function desktopDashboard(browser: Browser) {
   await shot(page, "d-knowledge", {
     tabs: page.getByRole("tab", { name: /Upload a file/ }),
     drop: page.getByText("Drop a file here, or click to browse"),
+    dropZone: page.getByRole("button", { name: /Drop a file here/ }),
+    newSourceRow: page.locator("main").getByText("Cosmetic-Treatments-2026.pdf", { exact: true }),
     usage: page.getByText(/sources used across your bots/),
     toast: page.getByText(/^Indexed “/),
     newSource: page.getByText("Cosmetic-Treatments-2026.pdf").last(),
@@ -281,6 +284,7 @@ async function desktopDashboard(browser: Browser) {
   await shot(page, "d-customize", {
     avatar: page.locator('button[aria-pressed][aria-label$="avatar"]').first(),
     color: page.locator('button[aria-label="Use colour #8f67ee"]'),
+    teal: page.locator('button[aria-label="Use colour #23798a"]'),
     hex: page.locator('input[aria-label="Hex colour"]'),
     welcome: page.getByText("Welcome message"),
     suggested: page.getByText("Suggested questions", { exact: true }),
@@ -313,12 +317,14 @@ async function desktopDashboard(browser: Browser) {
     listbox: page.getByRole("option", { name: "Won" }),
     csv: page.locator('a[href="/api/leads/export"]'),
     question: page.getByText("View conversation").first(),
+    q1: page.locator("main").getByText(/Do you treat sleep apnea\?/).first(),
   });
   await page.keyboard.press("Escape");
 
   await go(page, "/dashboard/analytics");
   await shot(page, "d-analytics", {
     kpi: page.getByText("Answer rate").first(),
+    kpiCard: page.locator("main").getByText("Conversations", { exact: true }).first().locator("xpath=ancestor::div[contains(@class,'rounded')][1]"),
     delta: page.getByText("vs previous 30d").first(),
     range: page.getByRole("link", { name: "30d" }),
     locked: page.locator('a[title^="Upgrade for 90"]'),
