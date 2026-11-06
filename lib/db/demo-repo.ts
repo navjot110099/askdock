@@ -1,100 +1,361 @@
 import "server-only";
-import { headers } from "next/headers";
-import { LimitError, NotFoundError, type Repo } from "@/lib/db/repo";
-import { siteUrl } from "@/lib/site-url";
+import { cookies } from "next/headers";
+import { DEMO_USER } from "@/lib/demo/constants";
+import { buildDemoDataset, type DemoDataset, type SeedChunk } from "@/lib/demo/seed";
+import { getPlan } from "@/lib/plans";
+import { searchLexical } from "@/lib/rag/lexical";
+import { WORKSPACE_COOKIE, WORKSPACE_ID } from "@/lib/session-cookies";
+import type { Bot, Conversation, Lead, Message, PublicBot, Source } from "@/lib/types";
+import { NotFoundError, type ConversationRow, type Repo } from "@/lib/db/repo";
 
 /**
- * Repository used when Supabase isn't configured: a thin client for the
- * in-memory store behind /api/workspace (lib/db/memory-store.ts).
+ * In-memory workspaces used when Supabase isn't configured.
  *
- * On Vercel every route is its own serverless function with its own memory,
- * so an upload saved by the sources API would be invisible to the dashboard
- * page. Sending every read and write to one route keeps the whole app on a
- * single store. The visitor's cookies are forwarded so the store picks their
- * private workspace.
+ * Every visitor gets a private copy of the seeded Juniper Dental workspace,
+ * keyed by the `askdock_ws` cookie the middleware issues. Reads use the shared
+ * pristine seed until the visitor first changes something (a chat, an upload,
+ * a lead); that write clones the seed into their own workspace. Requests
+ * without the cookie (e.g. the widget embedded on another site) share one
+ * fallback workspace. Workspaces live on `globalThis`, are capped per server
+ * instance and are dropped after a few idle hours or on sign-out.
  */
-type Method = Exclude<keyof Repo, "kind">;
+type State = DemoDataset;
+type Entry = { state: State; touched: number };
 
-const LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
+const MAX_WORKSPACES = 50;
+const IDLE_MS = 6 * 60 * 60 * 1000;
+const SHARED = "shared";
 
-// Only call back into hosts that serve this app, never one taken blindly from the request.
-const KNOWN_HOSTS = new Set(
-  [new URL(siteUrl).host, process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL, process.env.VERCEL_PROJECT_PRODUCTION_URL]
-    .filter((h): h is string => Boolean(h))
-    .map((h) => h.toLowerCase()),
-);
+const store = globalThis as unknown as { __askdockSeed?: State; __askdockWorkspaces?: Map<string, Entry> };
 
-function storeUrl(h: Headers) {
-  const host = (h.get("x-forwarded-host") ?? h.get("host") ?? "").toLowerCase();
-  if (LOCAL_HOST.test(host)) return `http://${host}/api/workspace`;
-  if (KNOWN_HOSTS.has(host)) return `https://${host}/api/workspace`;
-  return `${siteUrl}/api/workspace`;
+/**
+ * The seeded history is generated relative to this moment. Pin it with
+ * DEMO_SEED_NOW (any ISO date) to get identical numbers across restarts,
+ * e.g. for screenshots; otherwise it is the server start time.
+ */
+function seedNow() {
+  const pinned = process.env.DEMO_SEED_NOW ? new Date(process.env.DEMO_SEED_NOW) : null;
+  return pinned && !Number.isNaN(pinned.getTime()) ? pinned : new Date();
 }
 
-async function call<T>(method: Method | "discardWorkspace", args: unknown[]): Promise<T> {
-  const h = await headers();
-  const res = await fetch(storeUrl(h), {
-    method: "POST",
-    cache: "no-store",
-    headers: { "content-type": "application/json", cookie: h.get("cookie") ?? "" },
-    body: JSON.stringify({ method, args }),
-  });
-  const data = (await res.json().catch(() => null)) as { value?: T; error?: { name: string; message: string } } | null;
-  if (data?.error) {
-    if (data.error.name === "NotFoundError") throw new NotFoundError(data.error.message);
-    if (data.error.name === "LimitError") throw new LimitError(data.error.message);
-    throw new Error(`Workspace ${method} failed: ${data.error.message}`);
+function seed(): State {
+  store.__askdockSeed ??= buildDemoDataset(DEMO_USER.id, seedNow());
+  return store.__askdockSeed;
+}
+
+function workspaces() {
+  store.__askdockWorkspaces ??= new Map();
+  return store.__askdockWorkspaces;
+}
+
+async function workspaceId() {
+  try {
+    const value = (await cookies()).get(WORKSPACE_COOKIE)?.value;
+    return value && WORKSPACE_ID.test(value) ? value : SHARED;
+  } catch {
+    // Outside a request (build time, scripts) there is no visitor.
+    return SHARED;
   }
-  if (!res.ok || !data) throw new Error(`Workspace ${method} failed (${res.status})`);
-  return data.value as T;
 }
 
-function remote<M extends Method>(method: M): Repo[M] {
-  return ((...args: unknown[]) => call(method, args)) as Repo[M];
+/** The visitor's workspace; `write` makes a private copy of the seed on first use. */
+async function state(intent: "read" | "write" = "read"): Promise<State> {
+  const id = await workspaceId();
+  const map = workspaces();
+  const entry = map.get(id);
+  if (entry) {
+    // Re-insert so the Map stays ordered least-recently-used first.
+    map.delete(id);
+    entry.touched = Date.now();
+    map.set(id, entry);
+    return entry.state;
+  }
+  if (intent === "read") return seed();
+
+  const created: Entry = { state: structuredClone(seed()), touched: Date.now() };
+  map.set(id, created);
+  const cutoff = Date.now() - IDLE_MS;
+  for (const [key, value] of map) {
+    if (map.size <= MAX_WORKSPACES && value.touched >= cutoff) break;
+    if (key !== id) map.delete(key);
+  }
+  return created.state;
 }
 
-/** Drops the current visitor's workspace so their next sign-in starts from fresh sample data. */
-export async function discardWorkspace() {
-  await call("discardWorkspace", []);
+/** Drops a visitor's workspace so their next visit starts from fresh sample data. */
+export function discardWorkspace(id: string | undefined) {
+  if (id) workspaces().delete(id);
+}
+
+const now = () => new Date().toISOString();
+
+function ownedBot(s: State, ownerId: string, botId: string) {
+  const bot = s.bots.find((b) => b.id === botId && b.ownerId === ownerId);
+  if (!bot) throw new NotFoundError("Bot not found");
+  return bot;
+}
+
+function ownedBotIds(s: State, ownerId: string) {
+  return new Set(s.bots.filter((b) => b.ownerId === ownerId).map((b) => b.id));
+}
+
+function withBot(s: State, conv: Conversation): ConversationRow {
+  const bot = s.bots.find((b) => b.id === conv.botId);
+  return { ...conv, botName: bot?.name ?? "Deleted bot", botColor: bot?.brandColor ?? "#8f67ee" };
 }
 
 export const demoRepo: Repo = {
   kind: "demo",
 
-  getSubscription: remote("getSubscription"),
-  upsertSubscription: remote("upsertSubscription"),
-  findUserIdByStripeCustomer: remote("findUserIdByStripeCustomer"),
+  async getSubscription(userId) {
+    const sub = (await state()).subscription;
+    return sub.userId === userId ? sub : { ...sub, userId, plan: "free" };
+  },
+  async upsertSubscription(sub) {
+    Object.assign((await state("write")).subscription, sub);
+  },
+  async findUserIdByStripeCustomer() {
+    return null;
+  },
 
-  listBots: remote("listBots"),
-  countBots: remote("countBots"),
-  getBot: remote("getBot"),
-  createBot: remote("createBot"),
-  updateBot: remote("updateBot"),
-  deleteBot: remote("deleteBot"),
-  getPublicBot: remote("getPublicBot"),
-  // Files don't travel as JSON; avatars are stored inline as data URLs anyway.
+  async listBots(ownerId) {
+    const s = await state();
+    const since = Date.now() - 30 * 86_400_000;
+    return s.bots
+      .filter((b) => b.ownerId === ownerId)
+      .map((bot) => ({
+        ...bot,
+        sourceCount: s.sources.filter((x) => x.botId === bot.id).length,
+        conversations30d: s.conversations.filter((c) => c.botId === bot.id && Date.parse(c.startedAt) >= since).length,
+        leadCount: s.leads.filter((l) => l.botId === bot.id).length,
+      }))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  },
+  async countBots(ownerId) {
+    return (await state()).bots.filter((b) => b.ownerId === ownerId).length;
+  },
+  async getBot(ownerId, botId) {
+    return (await state()).bots.find((b) => b.id === botId && b.ownerId === ownerId) ?? null;
+  },
+  async createBot(ownerId, input) {
+    const bot: Bot = {
+      id: crypto.randomUUID(),
+      ownerId,
+      name: input.name,
+      avatar: input.avatar ?? "preset:spark",
+      brandColor: input.brandColor ?? "#8f67ee",
+      welcomeMessage: input.welcomeMessage ?? "Hi! How can I help you today?",
+      suggestedQuestions: input.suggestedQuestions ?? [],
+      instructions: input.instructions ?? "",
+      leadCapture: input.leadCapture ?? true,
+      createdAt: now(),
+      updatedAt: now(),
+    };
+    (await state("write")).bots.push(bot);
+    return bot;
+  },
+  async updateBot(ownerId, botId, patch) {
+    const bot = ownedBot(await state("write"), ownerId, botId);
+    Object.assign(bot, patch, { updatedAt: now() });
+    return bot;
+  },
+  async deleteBot(ownerId, botId) {
+    const s = await state("write");
+    ownedBot(s, ownerId, botId);
+    s.bots = s.bots.filter((b) => b.id !== botId);
+    s.sources = s.sources.filter((x) => x.botId !== botId);
+    s.chunks = s.chunks.filter((x) => x.botId !== botId);
+    s.conversations = s.conversations.filter((x) => x.botId !== botId);
+    s.messages = s.messages.filter((x) => x.botId !== botId);
+    s.leads = s.leads.filter((x) => x.botId !== botId);
+  },
+  async getPublicBot(botId) {
+    const bot = (await state()).bots.find((b) => b.id === botId);
+    if (!bot) return null;
+    const plan = getPlan((await demoRepo.getSubscription(bot.ownerId)).plan);
+    return {
+      id: bot.id,
+      ownerId: bot.ownerId,
+      name: bot.name,
+      avatar: bot.avatar,
+      brandColor: bot.brandColor,
+      welcomeMessage: bot.welcomeMessage,
+      suggestedQuestions: bot.suggestedQuestions,
+      instructions: bot.instructions,
+      leadCapture: bot.leadCapture && plan.leadCapture,
+      showBranding: !plan.removeBranding,
+    } satisfies PublicBot;
+  },
   async uploadAvatar(ownerId, botId, file) {
-    if (!(await demoRepo.getBot(ownerId, botId))) throw new NotFoundError("Bot not found");
+    ownedBot(await state(), ownerId, botId);
     const bytes = Buffer.from(await file.arrayBuffer());
     return `data:${file.type};base64,${bytes.toString("base64")}`;
   },
 
-  listSources: remote("listSources"),
-  countSources: remote("countSources"),
-  createSource: remote("createSource"),
-  completeSource: remote("completeSource"),
-  deleteSource: remote("deleteSource"),
-  searchChunks: remote("searchChunks"),
+  async listSources(ownerId, botId) {
+    const st = await state();
+    ownedBot(st, ownerId, botId);
+    return st.sources
+      .filter((s) => s.botId === botId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  async countSources(ownerId) {
+    const st = await state();
+    const ids = ownedBotIds(st, ownerId);
+    return st.sources.filter((s) => ids.has(s.botId)).length;
+  },
+  async createSource(ownerId, botId, input) {
+    const st = await state("write");
+    ownedBot(st, ownerId, botId);
+    const source: Source = {
+      id: crypto.randomUUID(),
+      botId,
+      kind: input.kind,
+      name: input.name,
+      url: input.url,
+      status: "processing",
+      error: null,
+      charCount: 0,
+      chunkCount: 0,
+      pageCount: 0,
+      createdAt: now(),
+    };
+    st.sources.push(source);
+    return source;
+  },
+  async completeSource(sourceId, result, chunks = []) {
+    const s = await state("write");
+    const source = s.sources.find((x) => x.id === sourceId);
+    if (!source) return;
+    Object.assign(source, {
+      status: result.status,
+      error: result.error ?? null,
+      charCount: result.charCount ?? source.charCount,
+      pageCount: result.pageCount ?? source.pageCount,
+      chunkCount: chunks.length,
+    });
+    s.chunks.push(
+      ...chunks.map<SeedChunk>((c) => ({
+        id: crypto.randomUUID(),
+        botId: source.botId,
+        sourceId,
+        content: c.content,
+        title: c.title,
+        url: c.url,
+        position: c.position,
+      })),
+    );
+  },
+  async deleteSource(ownerId, sourceId) {
+    const s = await state("write");
+    const source = s.sources.find((x) => x.id === sourceId);
+    if (!source) return;
+    ownedBot(s, ownerId, source.botId);
+    s.sources = s.sources.filter((x) => x.id !== sourceId);
+    s.chunks = s.chunks.filter((x) => x.sourceId !== sourceId);
+  },
+  async searchChunks(botId, query, k = 5) {
+    return searchLexical(
+      (await state()).chunks.filter((c) => c.botId === botId),
+      query,
+      k,
+    );
+  },
 
-  ensureConversation: remote("ensureConversation"),
-  addMessage: remote("addMessage"),
-  countMessagesSince: remote("countMessagesSince"),
-  listConversations: remote("listConversations"),
-  getConversation: remote("getConversation"),
+  async ensureConversation({ id, botId, visitorId, firstQuestion, country }) {
+    const s = await state("write");
+    const existing = s.conversations.find((c) => c.id === id);
+    if (existing) return existing.botId === botId ? existing : null;
+    const conv: Conversation = {
+      id,
+      botId,
+      visitorId,
+      startedAt: now(),
+      lastMessageAt: now(),
+      messageCount: 0,
+      unanswered: false,
+      firstQuestion,
+      leadEmail: null,
+      country,
+    };
+    s.conversations.unshift(conv);
+    return conv;
+  },
+  async addMessage({ conversationId, botId, role, content, citations = [], answered = null }) {
+    const s = await state("write");
+    const msg: Message = { id: crypto.randomUUID(), conversationId, botId, role, content, citations, answered, createdAt: now() };
+    s.messages.push(msg);
+    const conv = s.conversations.find((c) => c.id === conversationId);
+    if (conv) {
+      conv.messageCount += 1;
+      conv.lastMessageAt = msg.createdAt;
+      if (role === "assistant" && answered === false) conv.unanswered = true;
+      // Keep most-recent-first ordering.
+      s.conversations = [conv, ...s.conversations.filter((c) => c.id !== conversationId)];
+    }
+  },
+  async countMessagesSince(ownerId, sinceIso) {
+    const st = await state();
+    const ids = ownedBotIds(st, ownerId);
+    return st.messages.filter((m) => m.role === "user" && ids.has(m.botId) && m.createdAt >= sinceIso).length;
+  },
+  async listConversations(ownerId, opts = {}) {
+    const st = await state();
+    const ids = ownedBotIds(st, ownerId);
+    const q = opts.query?.toLowerCase().trim();
+    return st.conversations
+      .filter(
+        (c) =>
+          ids.has(c.botId) &&
+          (!opts.botId || c.botId === opts.botId) &&
+          (opts.filter !== "unanswered" || c.unanswered) &&
+          (opts.filter !== "leads" || c.leadEmail) &&
+          (!q || c.firstQuestion?.toLowerCase().includes(q) || c.leadEmail?.includes(q)),
+      )
+      .slice(0, opts.limit ?? 50)
+      .map((c) => withBot(st, c));
+  },
+  async getConversation(ownerId, conversationId) {
+    const st = await state();
+    const conv = st.conversations.find((c) => c.id === conversationId);
+    if (!conv || !ownedBotIds(st, ownerId).has(conv.botId)) return null;
+    const messages = st.messages
+      .filter((m) => m.conversationId === conversationId)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    return { conversation: withBot(st, conv), messages };
+  },
 
-  createLead: remote("createLead"),
-  listLeads: remote("listLeads"),
-  updateLeadStatus: remote("updateLeadStatus"),
+  async createLead({ botId, conversationId, email, name, question }) {
+    const s = await state("write");
+    const lead: Lead = { id: crypto.randomUUID(), botId, conversationId, email, name, question, status: "new", createdAt: now() };
+    s.leads.unshift(lead);
+    const conv = s.conversations.find((c) => c.id === conversationId);
+    if (conv) conv.leadEmail = email;
+    return lead;
+  },
+  async listLeads(ownerId, opts = {}) {
+    const st = await state();
+    const ids = ownedBotIds(st, ownerId);
+    const bots = st.bots;
+    return st.leads
+      .filter((l) => ids.has(l.botId) && (!opts.botId || l.botId === opts.botId) && (!opts.status || l.status === opts.status))
+      .map((l) => ({ ...l, botName: bots.find((b) => b.id === l.botId)?.name ?? "Deleted bot" }));
+  },
+  async updateLeadStatus(ownerId, leadId, status) {
+    const st = await state("write");
+    const lead = st.leads.find((l) => l.id === leadId);
+    if (!lead || !ownedBotIds(st, ownerId).has(lead.botId)) throw new NotFoundError("Lead not found");
+    lead.status = status;
+  },
 
-  getActivity: remote("getActivity"),
+  async getActivity(ownerId, sinceIso, botId) {
+    const s = await state();
+    const ids = ownedBotIds(s, ownerId);
+    const keep = (b: string) => ids.has(b) && (!botId || b === botId);
+    return {
+      messages: s.messages.filter((m) => keep(m.botId) && m.createdAt >= sinceIso),
+      conversations: s.conversations.filter((c) => keep(c.botId) && c.startedAt >= sinceIso),
+      leads: s.leads.filter((l) => keep(l.botId) && l.createdAt >= sinceIso),
+    };
+  },
 };

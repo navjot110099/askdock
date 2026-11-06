@@ -62,7 +62,6 @@ Under the hood each answer is retrieval-augmented: the question is matched again
 
 Whenever the Supabase keys are missing, AskDock runs on **in-memory workspaces** built from the same seed data as `npm run seed`. Visitors see a normal product, with no banners or setup notes:
 
-- all workspaces live in one route, `/api/workspace` (`lib/db/memory-store.ts`); every page, server action and API route reaches it through the thin client in `lib/db/demo-repo.ts`. On Vercel each route is a separate serverless function with its own memory, so this is what lets an upload, chat or lead saved by one route show up on every other page,
 - the middleware gives each browser a private workspace id cookie (`askdock_ws`); reads use the pristine seed until the visitor first changes something, which clones it into their own workspace, so one visitor's chats, uploads and leads are never visible to another,
 - sign-in (pre-filled with the sample account) opens that workspace; signing out discards it, so the next sign-in starts fresh,
 - workspaces are capped at 50 per server instance and dropped after 6 idle hours; requests without the cookie (the widget embedded on another site) share one fallback workspace,
@@ -195,7 +194,7 @@ app/
 components/           chat window, marketing sections, dashboard UI, shadcn/ui
 lib/
   rag/                chunking, extraction, crawler, embeddings, prompt, lexical search, offline responder
-  db/                 repository interface, Supabase repo, in-memory store + its client
+  db/                 repository interface + Supabase and per-visitor in-memory implementations
   demo/               Juniper Dental knowledge base and deterministic seed generator
   plans.ts stripe.ts analytics.ts auth.ts env.ts logger.ts
 public/widget.js      the embeddable chat bubble

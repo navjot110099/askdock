@@ -95,7 +95,7 @@ export async function signOut() {
   if (isDemoMode) {
     // Signing out drops the visitor's workspace; the next sign-in starts from fresh sample data.
     const jar = await cookies();
-    await discardWorkspace();
+    discardWorkspace(jar.get(WORKSPACE_COOKIE)?.value);
     jar.delete(SESSION_COOKIE);
     jar.set(WORKSPACE_COOKIE, crypto.randomUUID(), cookieOptions(30));
   } else {
