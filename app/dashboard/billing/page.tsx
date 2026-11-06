@@ -16,8 +16,8 @@ export const metadata: Metadata = { title: "Billing" };
 const NOTICES = {
   success: { icon: CheckCircle2, tone: "border-emerald-200 bg-emerald-50 text-emerald-800", text: "Payment received — your plan updates as soon as Stripe confirms it (usually a few seconds)." },
   cancelled: { icon: XCircle, tone: "border-amber-200 bg-amber-50 text-amber-800", text: "Checkout was cancelled. You haven't been charged." },
-  demo: { icon: Info, tone: "border-iris/20 bg-accent text-accent-foreground", text: "Demo mode: Stripe isn't configured, so the plan was switched instantly without payment." },
-  unconfigured: { icon: Info, tone: "border-amber-200 bg-amber-50 text-amber-800", text: "Stripe isn't configured yet. Add your test-mode keys and price IDs to .env.local to enable checkout." },
+  demo: { icon: CheckCircle2, tone: "border-emerald-200 bg-emerald-50 text-emerald-800", text: "Your plan has been updated." },
+  unconfigured: { icon: Info, tone: "border-amber-200 bg-amber-50 text-amber-800", text: "Online checkout is unavailable right now. Please try again in a little while." },
 } as const;
 
 export default async function BillingPage({ searchParams }: { searchParams: Promise<{ checkout?: string; upgrade?: string }> }) {
@@ -78,16 +78,11 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
               <form action={startCheckout}>
                 <input type="hidden" name="plan" value="free" />
                 <SubmitButton variant="outline" size="lg" className="h-10 rounded-xl bg-white">
-                  Switch to Free (demo)
+                  Switch to Free
                 </SubmitButton>
               </form>
             )}
           </div>
-          {hasStripe && (
-            <p className="mt-4 text-[12px] text-muted-foreground">
-              Stripe test mode — pay with card <span className="font-mono">4242 4242 4242 4242</span>, any future expiry and any CVC.
-            </p>
-          )}
         </Panel>
 
         <Panel title="Usage" description="Limits reset on the 1st of every month.">

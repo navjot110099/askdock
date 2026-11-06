@@ -24,7 +24,7 @@ export default async function KnowledgePage({ params, searchParams }: { params: 
     usage.sources >= plan.limits.sources
       ? `You've used all ${plan.limits.sources} knowledge sources on the ${plan.name} plan. Remove one or upgrade to add more.`
       : !isDemoMode && !hasOpenAI
-        ? "Add OPENAI_API_KEY to your environment to index documents."
+        ? "Adding knowledge is unavailable right now. Please try again in a little while."
         : null;
 
   return (

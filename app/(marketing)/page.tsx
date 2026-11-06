@@ -5,7 +5,7 @@ import { Faq, Features, FinalCta, HowItWorks, Industries, Pricing } from "@/comp
 import { toChatConfig } from "@/lib/chat-config";
 import { repo } from "@/lib/db";
 import { DEMO_BOT_ID } from "@/lib/demo/constants";
-import { env, hasOpenAI } from "@/lib/env";
+import { env } from "@/lib/env";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -41,7 +41,7 @@ export default async function LandingPage() {
       <Industries />
       <HowItWorks />
       <Features />
-      <LiveDemo bot={demoBot} offline={!hasOpenAI} />
+      <LiveDemo bot={demoBot} />
       <Pricing />
       <Faq />
       <FinalCta />

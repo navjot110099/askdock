@@ -1,9 +1,9 @@
-import { Check, Info } from "lucide-react";
+import { Check } from "lucide-react";
 import { BotAvatar } from "@/components/bot-avatar";
 import { Logo } from "@/components/brand/logo";
 import { Aurora } from "@/components/marketing/hero";
 
-export function AuthShell({ title, subtitle, demo, children }: { title: React.ReactNode; subtitle: string; demo: boolean; children: React.ReactNode }) {
+export function AuthShell({ title, subtitle, children }: { title: React.ReactNode; subtitle: string; children: React.ReactNode }) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1fr_1.05fr]">
       <main className="flex flex-col px-5 py-6 sm:px-10">
@@ -11,19 +11,9 @@ export function AuthShell({ title, subtitle, demo, children }: { title: React.Re
         <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col justify-center py-12">
           <h1 className="font-display text-[42px] leading-[1.02] tracking-[-0.015em] sm:text-5xl">{title}</h1>
           <p className="mt-3 text-[15px] text-muted-foreground">{subtitle}</p>
-          {demo && (
-            <p className="mt-6 flex gap-2.5 rounded-2xl border border-iris/20 bg-accent px-4 py-3 text-[13px] leading-relaxed text-accent-foreground">
-              <Info className="mt-0.5 size-4 shrink-0" />
-              <span>
-                <strong>Demo mode.</strong> Supabase keys aren&apos;t configured, so any sign-in opens the seeded Juniper Dental workspace.
-              </span>
-            </p>
-          )}
           <div className="mt-8">{children}</div>
         </div>
-        <p className="text-center text-[12px] text-muted-foreground">
-          Demo project by <span className="font-semibold text-foreground">OVIOWEB</span>
-        </p>
+        <p className="text-center text-[12px] text-muted-foreground">© {new Date().getFullYear()} AskDock</p>
       </main>
 
       <aside className="relative hidden overflow-hidden bg-ink p-10 text-white lg:flex lg:flex-col lg:justify-between">
@@ -54,12 +44,12 @@ export function AuthShell({ title, subtitle, demo, children }: { title: React.Re
           </div>
         </div>
 
-        <figure className="relative">
-          <blockquote className="font-display text-[30px] leading-[1.15]">
-            “It&apos;s like hiring a receptionist who has read every page of our website — and never takes a lunch break.”
-          </blockquote>
-          <figcaption className="mt-4 text-[13px] text-white/60">Demo testimonial · Juniper Dental Studio (fictional)</figcaption>
-        </figure>
+        <div className="relative">
+          <p className="font-display text-[30px] leading-[1.15]">
+            Every answer cites its source. <em className="text-gradient">Every unanswered question becomes a lead.</em>
+          </p>
+          <p className="mt-4 text-[13px] text-white/60">Set up in about five minutes · Free plan, no card needed</p>
+        </div>
       </aside>
     </div>
   );

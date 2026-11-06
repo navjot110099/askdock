@@ -6,8 +6,8 @@ import { DEMO_BOT_ID } from "@/lib/demo/constants";
 import { env } from "@/lib/env";
 
 export const metadata: Metadata = {
-  title: "Widget demo — Juniper Dental Studio (sample site)",
-  description: "A sample small-business website with the AskDock chat widget installed.",
+  title: "Example site — AskDock on a clinic website",
+  description: "See the AskDock chat widget running on an example clinic website.",
   robots: { index: false },
 };
 
@@ -31,7 +31,7 @@ export default async function WidgetDemoPage({ searchParams }: { searchParams: P
   return (
     <div className="min-h-dvh bg-[#f4f9f9] text-[#123b42]">
       <div className="bg-ink px-4 py-2 text-center text-[12px] text-white/80">
-        Sample website showing the AskDock widget in the corner →{" "}
+        Example website · The chat bubble in the corner is AskDock →{" "}
         <Link href="/" className="inline-flex items-center gap-1 font-semibold text-white underline-offset-2 hover:underline">
           <ArrowLeft className="size-3" /> Back to AskDock
         </Link>
@@ -109,7 +109,7 @@ export default async function WidgetDemoPage({ searchParams }: { searchParams: P
       </main>
 
       <footer className="border-t border-[#2b8c9b]/10 py-8 text-center text-[12px] text-[#15474f]/60">
-        Juniper Dental Studio is a fictional clinic used to demonstrate AskDock. · Demo project by OVIOWEB
+        Example website for previewing the AskDock widget. Juniper Dental Studio is not a real practice.
       </footer>
 
       {bot && <script src="/widget.js" data-bot={bot.id} async />}

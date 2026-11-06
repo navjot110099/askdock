@@ -166,12 +166,6 @@ async function desktopVisitor(browser: Browser) {
   await demo.locator("button", { hasText: /sources?$/ }).first().click();
   await page.waitForTimeout(800);
   await scrollTo(page, "#demo", 60);
-  if (process.env.HIDE_DEMO_NOTE) {
-    // Without OPENAI_API_KEY the demo shows a developer note under the copy; with a key it isn't rendered.
-    await page.getByText("Running without an OpenAI key").evaluate((el) => {
-      (el.closest("p") ?? el).remove();
-    });
-  }
   await shot(page, "d-demo", {
     header: demo.getByText("Online · replies instantly"),
     question: demo.getByText("How much are clear aligners?").last(),

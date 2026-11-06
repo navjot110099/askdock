@@ -3,8 +3,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { DEMO_SESSION_COOKIE } from "@/lib/auth";
+import { discardWorkspace } from "@/lib/db/demo-repo";
 import { env, isDemoMode } from "@/lib/env";
+import { cookieOptions, SESSION_COOKIE, WORKSPACE_COOKIE } from "@/lib/session-cookies";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = { error?: string; message?: string } | undefined;
@@ -25,9 +26,10 @@ function afterAuthPath(formData: FormData) {
   return plan === "pro" || plan === "business" ? `/dashboard/billing?upgrade=${plan}` : safeNext(formData.get("next"));
 }
 
+/** Without Supabase, signing in opens the visitor's private sample workspace. */
 async function startDemoSession(path: string): Promise<never> {
   const jar = await cookies();
-  jar.set(DEMO_SESSION_COOKIE, "1", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 7 });
+  jar.set(SESSION_COOKIE, "1", cookieOptions(7));
   redirect(path);
 }
 
@@ -91,7 +93,11 @@ export async function signInWithGoogle(formData: FormData) {
 
 export async function signOut() {
   if (isDemoMode) {
-    (await cookies()).delete(DEMO_SESSION_COOKIE);
+    // Signing out drops the visitor's workspace; the next sign-in starts from fresh sample data.
+    const jar = await cookies();
+    discardWorkspace(jar.get(WORKSPACE_COOKIE)?.value);
+    jar.delete(SESSION_COOKIE);
+    jar.set(WORKSPACE_COOKIE, crypto.randomUUID(), cookieOptions(30));
   } else {
     await (await createClient()).auth.signOut();
   }

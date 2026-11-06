@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   description:
     "Turn your PDFs, docs and website into a friendly AI assistant that answers customers 24/7 with cited sources, captures leads when it can't, and installs with one line of code.",
   applicationName: "AskDock",
-  creator: "OVIOWEB",
   keywords: ["AI chatbot", "customer support chatbot", "website chatbot", "RAG", "small business", "lead capture"],
   robots: { index: true, follow: true },
   openGraph: {

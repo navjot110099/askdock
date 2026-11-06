@@ -65,9 +65,8 @@ async function ask(page: Page, question: string, scope = "body") {
 async function signIn(page: Page) {
   await go(page, "/login");
   if (page.url().includes("/dashboard")) return;
-  const demo = await page.getByText("Demo mode.").count();
-  if (!demo) {
-    if (!process.env.SCREENSHOT_EMAIL || !process.env.SCREENSHOT_PASSWORD) throw new Error("Set SCREENSHOT_EMAIL and SCREENSHOT_PASSWORD for live mode.");
+  // Without Supabase the form is pre-filled with the sample account; live mode needs real credentials.
+  if (process.env.SCREENSHOT_EMAIL && process.env.SCREENSHOT_PASSWORD) {
     await page.fill("#email", process.env.SCREENSHOT_EMAIL);
     await page.fill("#password", process.env.SCREENSHOT_PASSWORD);
   }

@@ -4,7 +4,7 @@ export const ORTHO_BOT_ID = "7b2e3d4f-5061-4b8c-8d9e-1f2a3b4c5d6e";
 
 export const DEMO_USER = {
   id: "0d3e5a7c-9b1f-4d2e-8a6c-4b7d9e1f3a5c",
-  email: "demo@askdock.app",
+  email: "maya@juniperdental.example",
   name: "Maya Okafor",
   avatarUrl: null,
 };

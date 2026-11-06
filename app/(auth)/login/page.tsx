@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMetadata({
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; plan?: string; error?: string }> }) {
   const { next, plan, error } = await searchParams;
   return (
-    <AuthShell title={<>Welcome <em>back.</em></>} subtitle="Sign in to see your conversations, leads and analytics." demo={isDemoMode}>
+    <AuthShell title={<>Welcome <em>back.</em></>} subtitle="Sign in to see your conversations, leads and analytics.">
       <AuthForm mode="login" next={next} plan={plan} error={error} demo={isDemoMode} />
     </AuthShell>
   );

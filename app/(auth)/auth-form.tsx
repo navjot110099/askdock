@@ -8,6 +8,7 @@ import { signIn, signInWithGoogle, signUp, type AuthState } from "@/app/(auth)/a
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DEMO_USER } from "@/lib/demo/constants";
 
 type Props = { mode: "login" | "signup"; next?: string; plan?: string; demo: boolean; error?: string };
 
@@ -30,7 +31,7 @@ export function AuthForm({ mode, next, plan, demo, error: initialError }: Props)
         <Hidden next={next} plan={plan} />
         {mode === "signup" && (
           <Field label="Your name" htmlFor="name">
-            <Input id="name" name="name" autoComplete="name" placeholder="Maya Okafor" defaultValue={demo ? "Maya Okafor" : undefined} className="h-11 rounded-xl bg-white" />
+            <Input id="name" name="name" autoComplete="name" placeholder="Maya Okafor" defaultValue={demo ? DEMO_USER.name : undefined} className="h-11 rounded-xl bg-white" />
           </Field>
         )}
         <Field label="Work email" htmlFor="email">
@@ -41,7 +42,7 @@ export function AuthForm({ mode, next, plan, demo, error: initialError }: Props)
             required
             autoComplete="email"
             placeholder="you@business.com"
-            defaultValue={demo ? "demo@askdock.app" : undefined}
+            defaultValue={demo ? DEMO_USER.email : undefined}
             className="h-11 rounded-xl bg-white"
           />
         </Field>
@@ -54,7 +55,7 @@ export function AuthForm({ mode, next, plan, demo, error: initialError }: Props)
             minLength={8}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             placeholder="••••••••"
-            defaultValue={demo ? "demo-password" : undefined}
+            defaultValue={demo ? "juniper-dental" : undefined}
             className="h-11 rounded-xl bg-white"
           />
         </Field>

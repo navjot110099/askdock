@@ -10,7 +10,7 @@ const log = logger("stripe");
  * `stripe listen --forward-to localhost:3000/api/stripe/webhook`) here.
  */
 export async function POST(req: Request) {
-  if (!hasStripe || !env.stripeWebhookSecret) return new Response("Stripe is not configured", { status: 400 });
+  if (!hasStripe || !env.stripeWebhookSecret) return new Response("Billing is not enabled", { status: 400 });
 
   const signature = req.headers.get("stripe-signature");
   if (!signature) return new Response("Missing signature", { status: 400 });

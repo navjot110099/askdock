@@ -10,8 +10,8 @@ import {
   Globe,
   Home,
   Inbox,
+  Lightbulb,
   Palette,
-  Quote,
   Scale,
   Scissors,
   ShoppingBag,
@@ -394,11 +394,11 @@ export function Faq() {
         <div>
           <SectionTitle eyebrow="FAQ" title={<>Questions, <em>answered</em> (with sources).</>} />
           <Reveal delay={0.1} className="mt-8 hidden rounded-[26px] border border-black/[0.06] bg-white p-6 lg:block">
-            <Quote className="size-6 text-rose" />
+            <Lightbulb className="size-6 text-rose" />
             <p className="mt-3 font-display text-2xl leading-snug">
-              Half our phone calls were the same five questions. Now Juni answers them, and we only hear about the ones that need a person.
+              The questions your assistant can&apos;t answer land in Knowledge gaps, so you always know what to add next.
             </p>
-            <p className="mt-4 text-[13px] text-muted-foreground">Front-desk lead, Juniper Dental Studio (demo customer)</p>
+            <p className="mt-4 text-[13px] text-muted-foreground">Still curious? Ask Juni in the live demo above.</p>
           </Reveal>
         </div>
         <Reveal delay={0.05}>

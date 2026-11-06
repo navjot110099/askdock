@@ -24,10 +24,10 @@ npm run dev
 Then open http://localhost:3000 and:
 
 1. **Ask Juni something** in the *Live demo* section — try "How much are clear aligners?" (cited answer) or "Do you treat sleep apnea?" (lead capture).
-2. **Sign in** — demo mode opens the seeded workspace straight away, no password.
+2. **Sign in** — the form is pre-filled with the sample account, so one click opens a fully seeded workspace.
 3. **Explore the dashboard**: upload [`samples/Cosmetic-Treatments-2026.pdf`](samples) on the bot's *Knowledge* tab, restyle it on *Customise*, copy the snippet from *Install*, then check *Conversations*, *Leads* and *Analytics*.
 4. **See the widget on a website** at http://localhost:3000/widget-demo.
-5. **Start over** any time with **Reset demo** in the purple *Demo mode* banner.
+5. **Start over** any time: sign out and back in for a fresh copy of the sample data.
 
 ---
 
@@ -56,13 +56,15 @@ Under the hood each answer is retrieval-augmented: the question is matched again
 | **Dashboard** | Overview KPIs with period deltas, **messages per day** chart, **top questions**, knowledge gaps, busiest hours, conversations (filters, search, transcripts with citations), leads (status pipeline, CSV export) |
 | **Billing** | **Stripe test mode**: Checkout, signed **webhook** → plan sync, **customer portal**, usage meters. **Plan limits enforced** server-side (bots, sources, crawl pages, file size, monthly messages, lead capture, branding, CSV export, analytics range) |
 | **SEO** | Per-page titles, descriptions and canonical URLs, Open Graph + Twitter image, JSON-LD, `sitemap.xml`, `robots.txt`; dashboard, embed and sample pages are `noindex` |
-| **Demo mode** | Zero-config in-memory workspace with a **Demo mode** badge and **Reset demo** button; 2 bots, 4 sources, ~2 months of realistic conversations, leads and a Pro subscription |
+| **Zero-config mode** | Without any keys, each visitor gets a private in-memory copy of a fully seeded workspace: 2 bots, 4 sources, ~2 months of realistic conversations, leads and a Pro subscription. The UI shows no setup or "demo" labels |
 
-### Demo mode in detail
+### Zero-config mode in detail
 
-Whenever the Supabase keys are missing, AskDock runs on an **in-memory demo workspace** built from the same seed data as `npm run seed`:
+Whenever the Supabase keys are missing, AskDock runs on **in-memory workspaces** built from the same seed data as `npm run seed`. Visitors see a normal product, with no banners or setup notes:
 
-- sign-in opens the seeded workspace, and every dashboard page shows a **Demo mode** badge with a **Reset demo** button that restores the seed,
+- the middleware gives each browser a private workspace id cookie (`askdock_ws`); reads use the pristine seed until the visitor first changes something, which clones it into their own workspace, so one visitor's chats, uploads and leads are never visible to another,
+- sign-in (pre-filled with the sample account) opens that workspace; signing out discards it, so the next sign-in starts fresh,
+- workspaces are capped at 50 per server instance and dropped after 6 idle hours; requests without the cookie (the widget embedded on another site) share one fallback workspace,
 - uploads and crawls really parse and chunk content (stored in memory),
 - retrieval uses BM25 instead of pgvector, and without `OPENAI_API_KEY` answers are assembled extractively from the best-matching passages (still streamed, still cited, still triggering lead capture),
 - plan switches on the billing page apply instantly instead of going through Stripe,
@@ -98,7 +100,7 @@ Add `OPENAI_API_KEY`. Chat uses `OPENAI_CHAT_MODEL` (default `gpt-5.4-mini`); em
 npm run seed
 ```
 
-Creates `demo@askdock.app` (password from `SEED_DEMO_PASSWORD`, or a generated one printed once), the Juni and Aligner Concierge bots, embeds their knowledge into pgvector and inserts ~2 months of conversations and leads. It's idempotent. Keep `NEXT_PUBLIC_DEMO_BOT_ID` set to the printed bot id so the landing-page demo uses it.
+Creates `maya@juniperdental.example` (override with `SEED_DEMO_EMAIL`; password from `SEED_DEMO_PASSWORD`, or a generated one printed once), the Juni and Aligner Concierge bots, embeds their knowledge into pgvector and inserts ~2 months of conversations and leads. It's idempotent. Keep `NEXT_PUBLIC_DEMO_BOT_ID` set to the printed bot id so the landing-page demo uses it.
 
 ### 4. Stripe (test mode)
 
@@ -113,7 +115,7 @@ Creates `demo@askdock.app` (password from `SEED_DEMO_PASSWORD`, or a generated o
 
 ### 5. Deploy to Vercel
 
-1. Push the repo and import it in Vercel (framework preset: Next.js). With no variables at all it deploys in demo mode.
+1. Push the repo and import it in Vercel (framework preset: Next.js). With no variables at all it deploys in zero-config mode.
 2. For live mode, add the variables from `.env.example`. `NEXT_PUBLIC_APP_URL` is optional on Vercel: it falls back to the project's production domain.
 3. Add the production `/auth/callback` URL in Supabase and the production webhook endpoint in Stripe.
 
@@ -192,7 +194,7 @@ app/
 components/           chat window, marketing sections, dashboard UI, shadcn/ui
 lib/
   rag/                chunking, extraction, crawler, embeddings, prompt, lexical search, offline responder
-  db/                 repository interface + Supabase and in-memory demo implementations
+  db/                 repository interface + Supabase and per-visitor in-memory implementations
   demo/               Juniper Dental knowledge base and deterministic seed generator
   plans.ts stripe.ts analytics.ts auth.ts env.ts logger.ts
 public/widget.js      the embeddable chat bubble

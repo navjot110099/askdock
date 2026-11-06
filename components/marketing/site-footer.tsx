@@ -50,9 +50,6 @@ export function SiteFooter() {
       <div className="border-t border-black/[0.06]">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>© {new Date().getFullYear()} AskDock. All rights reserved.</p>
-          <p>
-            Demo project by <span className="font-semibold text-foreground">OVIOWEB</span>
-          </p>
         </div>
       </div>
     </footer>

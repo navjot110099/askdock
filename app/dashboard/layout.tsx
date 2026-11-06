@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { DemoBanner } from "@/components/dashboard/demo-banner";
 import { DashboardSidebar, MobileTopbar } from "@/components/dashboard/sidebar";
 import { requireUser } from "@/lib/auth";
 import { repo } from "@/lib/db";
-import { isDemoMode } from "@/lib/env";
 import { getWorkspace } from "@/lib/workspace";
 
 export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · AskDock" }, robots: { index: false } };
@@ -27,7 +25,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <DashboardSidebar {...props} />
       <div className="min-w-0 flex-1">
         <MobileTopbar {...props} />
-        {isDemoMode && <DemoBanner />}
         <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-8 sm:py-10">{children}</main>
       </div>
     </div>

@@ -18,7 +18,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
     <AuthShell
       title={<>Build your first <em>assistant.</em></>}
       subtitle={chosen ? `Create your account, then finish upgrading to ${chosen.name} ($${chosen.priceMonthly}/mo).` : "Free forever for one bot. No credit card needed."}
-      demo={isDemoMode}
+     
     >
       <AuthForm mode="signup" plan={chosen?.id} demo={isDemoMode} />
     </AuthShell>
