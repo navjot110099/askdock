@@ -2,17 +2,17 @@
 
 **Turn your website into a front desk that never sleeps.** AskDock learns a business's PDFs, Word documents and website, answers customers 24/7 **with cited sources**, collects an email when it doesn't know, and installs on any site with **one `<script>` tag**.
 
-**Live demo:** [askdock.vercel.app](https://askdock.vercel.app) · no sign-up, no keys
+**Live:** [askdock.vercel.app](https://askdock.vercel.app) · no sign-up, no keys
 
 ![AskDock landing page](screenshots/desktop/01-landing-hero.png)
 
-> Demo project by **OVIOWEB**. "Juniper Dental Studio" and everything about it is fictional.
+> Built by **OVIOWEB**.
 
 ---
 
-## Run the demo in 60 seconds
+## Run it in 60 seconds
 
-No accounts, API keys or `.env` file needed. With zero environment variables AskDock runs on an in-memory workspace seeded with **Juni**, the assistant for a fictional dental clinic.
+No accounts, API keys or `.env` file needed. With zero environment variables AskDock runs on an in-memory workspace seeded with **Juni**, the assistant for a dental clinic.
 
 ```bash
 git clone https://github.com/navjot110099/askdock.git
@@ -94,7 +94,7 @@ Next.js 15 (App Router, Server Actions, Turbopack) · TypeScript · Tailwind CSS
 
 Add `OPENAI_API_KEY`. Chat uses `OPENAI_CHAT_MODEL` (default `gpt-5.4-mini`); embeddings use `text-embedding-3-small` (1536 dimensions, matching the `vector(1536)` column).
 
-### 3. Seed the demo bot
+### 3. Seed the sample bot
 
 ```bash
 npm run seed
@@ -176,10 +176,9 @@ App code logs through `lib/logger.ts` instead of `console` (ESLint's `no-console
 | --- | --- |
 | `npm run dev` | Start the dev server |
 | `npm run build` / `npm start` | Production build / server |
-| `npm run seed` | Seed the demo workspace into Supabase |
+| `npm run seed` | Seed the sample workspace into Supabase |
 | `npm run screenshots` | Capture every key screen at 1440×900 and 390×844 into `screenshots/` (start the app first; set `SCREENSHOT_BASE_URL` if not on :3000) |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
-| `npx tsx portfolio/source/capture.ts` → `render.ts` | Rebuild the 10 portfolio slides in `portfolio/` (see the header of `capture.ts`) |
 
 ## Project structure
 
@@ -202,7 +201,6 @@ supabase/migrations/  schema, pgvector, RLS, triggers
 scripts/              seed + Playwright screenshots
 samples/              sample PDF and DOCX for testing uploads
 screenshots/          desktop/ and mobile/ captures
-portfolio/            10 annotated portfolio slides + the scripts that build them
 ```
 
 ## Screenshots
@@ -211,4 +209,4 @@ All screens are in [`screenshots/desktop`](screenshots/desktop) (1440×900) and 
 
 ---
 
-Demo project by **OVIOWEB**.
+Built by **OVIOWEB**.

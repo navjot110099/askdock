@@ -21,7 +21,7 @@ const SERVICES = [
 ];
 
 /**
- * A fictional clinic website with the real AskDock embed snippet on it, so the
+ * A sample clinic website with the real AskDock embed snippet on it, so the
  * widget can be tried exactly as a customer's visitors would see it.
  */
 export default async function WidgetDemoPage({ searchParams }: { searchParams: Promise<{ bot?: string }> }) {
@@ -68,7 +68,7 @@ export default async function WidgetDemoPage({ searchParams }: { searchParams: P
           <div className="relative h-[340px] overflow-hidden rounded-[36px] bg-[radial-gradient(120%_90%_at_20%_10%,#bfe7e6,transparent_60%),radial-gradient(90%_80%_at_90%_90%,#a7d3f0,transparent_55%),linear-gradient(160deg,#dff3f1,#cfe8f3)] sm:h-[420px]">
             <div className="absolute bottom-6 left-6 right-6 rounded-3xl bg-white/80 p-5 backdrop-blur">
               <p className="font-display text-2xl">“The calmest dental visit I&apos;ve ever had.”</p>
-              <p className="mt-1 text-[13px] text-[#15474f]/60">Sample patient review</p>
+              <p className="mt-1 text-[13px] text-[#15474f]/60">Patient review</p>
             </div>
           </div>
         </section>
@@ -109,7 +109,7 @@ export default async function WidgetDemoPage({ searchParams }: { searchParams: P
       </main>
 
       <footer className="border-t border-[#2b8c9b]/10 py-8 text-center text-[12px] text-[#15474f]/60">
-        Example website for previewing the AskDock widget. Juniper Dental Studio is not a real practice.
+        Juniper Dental Studio · a sample site showing the AskDock widget in place.
       </footer>
 
       {bot && <script src="/widget.js" data-bot={bot.id} async />}

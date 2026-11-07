@@ -1,7 +1,7 @@
 /**
- * Knowledge base for the seeded demo bot — "Juni", the assistant for the
- * fictional Juniper Dental Studio. Used by both the Supabase seed script
- * (chunked + embedded with OpenAI) and the in-memory demo workspace.
+ * Knowledge base for the seeded bot — "Juni", the assistant for the
+ * Juniper Dental Studio. Used by both the Supabase seed script
+ * (chunked + embedded with OpenAI) and the in-memory workspace.
  *
  * All names, addresses, phone numbers and domains are invented.
  */
